@@ -13,6 +13,7 @@ public class Tests
     [TestCase("X")]
     [TestCase("XL")]
     [TestCase("L")]
+    [TestCase("XC")]
     public void OneDigit(string romanNumber) =>
         Assert.That(Evaluate(romanNumber), Is.EqualTo(romanNumber));
 
@@ -40,6 +41,6 @@ public class Tests
         return result;
     }
 
-    (string roman, int val)[] romanDigits = 
-        new[] { ("L", 50), ("XL", 40), ("X", 10), ("IX", 9), ("V", 5), ("IV", 4), ("I", 1) };
+    (string roman, int val)[] romanDigits = new[] 
+        { ("XC", 90), ("L", 50), ("XL", 40), ("X", 10), ("IX", 9), ("V", 5), ("IV", 4), ("I", 1) };
 }
