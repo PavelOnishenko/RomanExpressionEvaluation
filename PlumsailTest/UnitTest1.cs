@@ -1,21 +1,9 @@
-namespace PlumsailTest
+namespace PlumsailTest;
+
+public class Tests
 {
-    public class Tests
-    {
-        [SetUp]
-        public void Setup()
-        {
-        }
+    [Test]
+    public void ReturnsSame() => Assert.That((string?)Evaluate("I"), Is.EqualTo("I"));
 
-        [Test]
-        public void ReturnsSomething()
-        {
-            Assert.DoesNotThrow(() => Evaluate("I"));
-        }
-
-        private string Evaluate(string input) 
-        {
-            return null;
-        }
-    }
+    private string Evaluate(string input) => "I";
 }
