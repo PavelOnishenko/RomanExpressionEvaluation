@@ -5,6 +5,10 @@ namespace PlumsailTest;
 
 public class Tests
 {
+    [Test]
+    public void SimplestAddition() =>
+        Assert.That(Evaluate("I+I"), Is.EqualTo("II"));
+
     [TestCase("I")]
     [TestCase("II")]
     [TestCase("IV")]
@@ -35,14 +39,14 @@ public class Tests
     private string IntToRoman(int number)
     {
         var result = "";
-        var i = 0;
+        var digitIndex = 0;
         while (number > 0)
-            if (number >= romanDigits[i].val)
+            if (number >= romanDigits[digitIndex].val)
             {
-                number -= romanDigits[i].val;
-                result += romanDigits[i].roman;
+                number -= romanDigits[digitIndex].val;
+                result += romanDigits[digitIndex].roman;
             }
-            else i++;
+            else digitIndex++;
         return result;
     }
 
