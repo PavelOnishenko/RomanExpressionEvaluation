@@ -29,10 +29,13 @@ public class Tests
     private string Evaluate(string input)
     {
         var digitsForParsing = romanDigits.OrderByDescending(x => x.roman.Length).ToArray();
-        var parser = Parse.String("IV").Return(4);
+        //todo add initial string and add iv to the digit info collection
+        var digitParser = Parse.String("IV").Return(4);
         foreach (var tuple in digitsForParsing)
-            parser = parser.Or(Parse.String(tuple.roman).Return(tuple.val));
-        var number = parser.Many().Select(x => x.Sum()).Parse(input);
+            digitParser = digitParser.Or(Parse.String(tuple.roman).Return(tuple.val));
+        var plusParser = Parse.Char('+');
+        var sumParser = Parse.ChainOperator(plusParser, digitParser, (op, a, b) => a + b);
+        var number = sumParser.Many().Select(x => x.Sum()).Parse(input);
         return IntToRoman(number);
     }
 
