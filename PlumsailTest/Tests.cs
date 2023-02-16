@@ -6,6 +6,10 @@ namespace PlumsailTest;
 public class Tests
 {
     [Test]
+    public void SpaceInsideSum() =>
+        Assert.That(Evaluate("I +I"), Is.EqualTo("II"));
+
+    [Test]
     public void SimplestAddition() =>
         Assert.That(Evaluate("I+I"), Is.EqualTo("II"));
 
@@ -33,6 +37,7 @@ public class Tests
         var digitParser = Parse.String("IV").Return(4);
         foreach (var tuple in digitsForParsing)
             digitParser = digitParser.Or(Parse.String(tuple.roman).Return(tuple.val));
+        digitParser = digitParser.Token();
         var plusParser = Parse.Char('+');
         var sumParser = Parse.ChainOperator(plusParser, digitParser, (op, a, b) => a + b);
         var number = sumParser.Many().Select(x => x.Sum()).Parse(input);
