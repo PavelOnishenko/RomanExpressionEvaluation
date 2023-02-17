@@ -1,5 +1,8 @@
 using Sprache;
+using System;
 using System.Data;
+using System.Globalization;
+using System.Linq;
 
 namespace PlumsailTest;
 
@@ -9,8 +12,9 @@ public class Tests
     [TestCase("II-I", "I")]
     [TestCase("I +I", "II")]
     [TestCase("(I)", "I")]
+    [TestCase("(V-(I))", "IV")]
     public void ExpressionParsing(string input, string expectedEvaluation) => 
-        Assert.That(Evaluate(input), Is.EqualTo(expectedEvaluation));
+        Assert.That(RomanEvaluation.Evaluate(input), Is.EqualTo(expectedEvaluation));
 
     [TestCase("I")]
     [TestCase("II")]
@@ -27,49 +31,64 @@ public class Tests
     [TestCase("CM")]
     [TestCase("M")]
     public void OneDigit(string romanNumber) =>
-        Assert.That(Evaluate(romanNumber), Is.EqualTo(romanNumber));
+        Assert.That(RomanEvaluation.Evaluate(romanNumber), Is.EqualTo(romanNumber));
 
-    private string Evaluate(string input)
+    
+}
+
+class RomanEvaluation
+{
+    public static string Evaluate(string input)
     {
-        var digitsForParsing = romanDigits.OrderByDescending(x => x.roman.Length).ToArray();
-        //todo add initial string and add iv to the digit info collection
-        var digitParser = Parse.String("IV").Return(4);
-        foreach (var tuple in digitsForParsing)
-            digitParser = digitParser.Or(Parse.String(tuple.roman).Return(tuple.val));
-        var numberParser = digitParser.Many().Token().Select(x => x.Sum());
-        var plusParser = Parse.Char('+');
-        var minusParser = Parse.Char('-');
-        var operationSignParser = plusParser.Or(minusParser);
-        var operationParser = Parse.ChainOperator(operationSignParser, numberParser,
-            (op, a, b) => a + b * (op == '+' ? 1 : -1));
-
-        var subexpressionParser = 
-            from lparen in Parse.Char('(').Optional().Token()
-            from expr in operationParser
-            from rparen in Parse.Char(')').Optional().Token()
-            select expr;
-
-        var number = subexpressionParser.Parse(input);
+        var number = SubexpressionParser.Parse(input);
         return IntToRoman(number);
     }
 
-    private string IntToRoman(int number)
+    private static string IntToRoman(int number)
     {
         var result = "";
         var digitIndex = 0;
         while (number > 0)
-            if (number >= romanDigits[digitIndex].val)
+            if (number >= RomanDigits[digitIndex].val)
             {
-                number -= romanDigits[digitIndex].val;
-                result += romanDigits[digitIndex].roman;
+                number -= RomanDigits[digitIndex].val;
+                result += RomanDigits[digitIndex].roman;
             }
             else digitIndex++;
         return result;
     }
 
-    (string roman, int val)[] romanDigits = new[] 
-    { 
-        ("M", 1000), ("CM", 900), ("D", 500), ("CD", 400), ("C", 100), 
-        ("XC", 90), ("L", 50), ("XL", 40), ("X", 10), ("IX", 9), ("V", 5), ("IV", 4), ("I", 1) 
+    private static (string roman, int val)[] RomanDigits => new[]
+    {
+        ("M", 1000), ("CM", 900), ("D", 500), ("CD", 400), ("C", 100),
+        ("XC", 90), ("L", 50), ("XL", 40), ("X", 10), ("IX", 9), ("V", 5), ("IV", 4), ("I", 1)
     };
+
+    //todo add initial string and add iv to the digit info collection
+    private static Parser<int> BaseDigitParser => Parse.String("IV").Return(4);
+    private static Parser<int> NumberParser => DigitParser.Many().Token().Select(x => x.Sum());
+    private static Parser<char> OperationSignParser => Parse.Char('+').Or(Parse.Char('-'));
+    private static Parser<int> OperationParser => 
+        Parse.ChainOperator(OperationSignParser, SubexpressionParser,
+            (op, a, b) => a + b * (op == '+' ? 1 : -1));
+
+    private static Parser<int> SubexpressionParser =>
+        from lparen in Parse.Char('(').Optional().Token()
+        from expr in OperationParser
+        from rparen in Parse.Char(')').Optional().Token()
+        select expr;
+
+    private static Parser<int> DigitParser
+    {
+        get
+        {
+            var digitsForParsing = RomanDigits.OrderByDescending(x => x.roman.Length).ToArray();
+            var result = BaseDigitParser;
+            foreach(var tuple in digitsForParsing)
+            {
+                result = result.Or(Parse.String(tuple.roman).Return(tuple.val));
+            }
+            return result;
+        }
+    }
 }
