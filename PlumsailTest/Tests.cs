@@ -1,4 +1,3 @@
-using NUnit.Framework.Constraints;
 using Sprache;
 using System.Data;
 
@@ -45,23 +44,12 @@ public class Tests
         foreach (var tuple in digitsForParsing)
             digitParser = digitParser.Or(Parse.String(tuple.roman).Return(tuple.val));
         var numberParser = digitParser.Many().Token().Select(x => x.Sum());
-
         var plusParser = Parse.Char('+');
         var minusParser = Parse.Char('-');
         var operationSignParser = plusParser.Or(minusParser);
-
-        var operationParser = Parse.ChainOperator(operationSignParser, numberParser, 
-            (op, a, b) =>
-            {
-                if (op == '+')
-                    return a + b;
-                else if(op == '-')
-                    return a - b;
-                throw new Exception($"Unknown operation [{op}].");
-            });
-
+        var operationParser = Parse.ChainOperator(operationSignParser, numberParser,
+            (op, a, b) => a + b * (op == '+' ? 1 : -1));
         var number = operationParser.Parse(input);
-
         return IntToRoman(number);
     }
 
