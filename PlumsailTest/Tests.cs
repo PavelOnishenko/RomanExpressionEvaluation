@@ -8,6 +8,7 @@ public class Tests
     [TestCase("I+I", "II")]
     [TestCase("II-I", "I")]
     [TestCase("I +I", "II")]
+    [TestCase("(I)", "I")]
     public void ExpressionParsing(string input, string expectedEvaluation) => 
         Assert.That(Evaluate(input), Is.EqualTo(expectedEvaluation));
 
@@ -41,7 +42,14 @@ public class Tests
         var operationSignParser = plusParser.Or(minusParser);
         var operationParser = Parse.ChainOperator(operationSignParser, numberParser,
             (op, a, b) => a + b * (op == '+' ? 1 : -1));
-        var number = operationParser.Parse(input);
+
+        var subexpressionParser = 
+            from lparen in Parse.Char('(').Optional().Token()
+            from expr in operationParser
+            from rparen in Parse.Char(')').Optional().Token()
+            select expr;
+
+        var number = subexpressionParser.Parse(input);
         return IntToRoman(number);
     }
 
