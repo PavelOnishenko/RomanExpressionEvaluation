@@ -1,3 +1,4 @@
+using NUnit.Framework.Constraints;
 using Sprache;
 using System.Data;
 
@@ -5,6 +6,12 @@ namespace PlumsailTest;
 
 public class Tests
 {
+    [Test]
+    public void Subtraction()
+    {
+        Assert.That(Evaluate("V-I"), Is.EqualTo("IV"));
+    }
+
     [Test]
     public void SpaceInsideSum() =>
         Assert.That(Evaluate("I +I"), Is.EqualTo("II"));
@@ -37,10 +44,24 @@ public class Tests
         var digitParser = Parse.String("IV").Return(4);
         foreach (var tuple in digitsForParsing)
             digitParser = digitParser.Or(Parse.String(tuple.roman).Return(tuple.val));
-        digitParser = digitParser.Token();
+        var numberParser = digitParser.Many().Token().Select(x => x.Sum());
+
         var plusParser = Parse.Char('+');
-        var sumParser = Parse.ChainOperator(plusParser, digitParser, (op, a, b) => a + b);
-        var number = sumParser.Many().Select(x => x.Sum()).Parse(input);
+        var minusParser = Parse.Char('-');
+        var operationSignParser = plusParser.Or(minusParser);
+
+        var operationParser = Parse.ChainOperator(operationSignParser, numberParser, 
+            (op, a, b) =>
+            {
+                if (op == '+')
+                    return a + b;
+                else if(op == '-')
+                    return a - b;
+                throw new Exception($"Unknown operation [{op}].");
+            });
+
+        var number = operationParser.Parse(input);
+
         return IntToRoman(number);
     }
 
