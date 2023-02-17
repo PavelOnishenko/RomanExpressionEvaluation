@@ -5,19 +5,11 @@ namespace PlumsailTest;
 
 public class Tests
 {
-    [Test]
-    public void Subtraction()
-    {
-        Assert.That(Evaluate("V-I"), Is.EqualTo("IV"));
-    }
-
-    [Test]
-    public void SpaceInsideSum() =>
-        Assert.That(Evaluate("I +I"), Is.EqualTo("II"));
-
-    [Test]
-    public void SimplestAddition() =>
-        Assert.That(Evaluate("I+I"), Is.EqualTo("II"));
+    [TestCase("I+I", "II")]
+    [TestCase("II-I", "I")]
+    [TestCase("I +I", "II")]
+    public void ExpressionParsing(string input, string expectedEvaluation) => 
+        Assert.That(Evaluate(input), Is.EqualTo(expectedEvaluation));
 
     [TestCase("I")]
     [TestCase("II")]
