@@ -13,6 +13,7 @@ public class Tests
     [TestCase("I-II", "-I")]
     [TestCase("II*II", "IV")]
     [TestCase("I+II*II", "V")]
+    [TestCase("VI/III", "II")]
     public void ExpressionParsing(string input, string expectedEvaluation) => 
         Assert.That(RomanEvaluation.Evaluate(input), Is.EqualTo(expectedEvaluation));
 
@@ -77,14 +78,14 @@ class RomanEvaluation
 
     private static Parser<int> NumberParser => DigitParser.Many().Token().Select(x => x.Sum());
     private static Parser<char> LinearOperationSignParser => Parse.Char('+').Or(Parse.Char('-'));
-    private static Parser<char> NonLinearOperationSignParser => Parse.Char('*');
+    private static Parser<char> NonLinearOperationSignParser => Parse.Char('*').Or(Parse.Char('/'));
     private static Parser<int> ExpressionParser =>
         SubexpressionParser.Or(NumberParser);
     private static Parser<int> NonLinearOperationParser =>
         Parse.ChainOperator(NonLinearOperationSignParser, ExpressionParser,
             (operatorSign, a, b) => operatorSign switch
             {
-                '*' => a * b,
+                '*' => a * b, '/' => a / b,
                 _ => throw new Exception($"Unknown non-linear operator sign: [{operatorSign}].")
             });
     private static Parser<int> LinearOperationParser =>
