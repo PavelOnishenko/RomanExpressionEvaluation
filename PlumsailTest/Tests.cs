@@ -108,14 +108,11 @@ class RomanEvaluation
             (operatorSign, a, b) =>
             {
                 if(operatorSign == '/' && a % b != 0 && willThrowOnNonIntegerDivision)
-                {
                     throw new Exception("Non-integer division is prohibited. " +
                         $"To allow it, pass throwOnNonIntegerDivision = false. [{a}] / [{b}].");
-                }
                 return operatorSign switch
                 {
-                    '*' => a * b,
-                    '/' => a / b,
+                    '*' => a * b, '/' => a / b,
                     _ => throw new Exception($"Unknown non-linear operator sign: [{operatorSign}].")
                 };
             });
