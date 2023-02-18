@@ -5,6 +5,15 @@ namespace PlumsailTest;
 
 public class Tests
 {
+    [Test]
+    public void NonIntegerDivision()
+    {
+        var exception = Assert.Throws<Exception>(() => RomanEvaluation.Evaluate("III/II", true));
+
+        Assert.That(exception.Message, Is.EqualTo("Non-integer division is prohibited. " +
+            "To allow it, pass throwOnNonIntegerDivision = false. [3] / [2]."));
+    }
+
     [TestCase("I+I", "II")]
     [TestCase("II-I", "I")]
     [TestCase("I +I", "II")]
@@ -37,7 +46,13 @@ public class Tests
 
 class RomanEvaluation
 {
-    public static string Evaluate(string input) => IntToRoman(LinearOperationParser.Parse(input));
+    public static string Evaluate(string input, bool throwOnNonIntegerDivision = true)
+    {
+        willThrowOnNonIntegerDivision = throwOnNonIntegerDivision;
+        return IntToRoman(LinearOperationParser.Parse(input));
+    }
+
+    private static bool willThrowOnNonIntegerDivision = true;
 
     private static string IntToRoman(int number)
     {
@@ -83,10 +98,19 @@ class RomanEvaluation
         SubexpressionParser.Or(NumberParser);
     private static Parser<int> NonLinearOperationParser =>
         Parse.ChainOperator(NonLinearOperationSignParser, ExpressionParser,
-            (operatorSign, a, b) => operatorSign switch
+            (operatorSign, a, b) =>
             {
-                '*' => a * b, '/' => a / b,
-                _ => throw new Exception($"Unknown non-linear operator sign: [{operatorSign}].")
+                if(operatorSign == '/' && a % b != 0 && willThrowOnNonIntegerDivision)
+                {
+                    throw new Exception("Non-integer division is prohibited. " +
+                        $"To allow it, pass throwOnNonIntegerDivision = false. [{a}] / [{b}].");
+                }
+                return operatorSign switch
+                {
+                    '*' => a * b,
+                    '/' => a / b,
+                    _ => throw new Exception($"Unknown non-linear operator sign: [{operatorSign}].")
+                };
             });
     private static Parser<int> LinearOperationParser =>
         Parse.ChainOperator(LinearOperationSignParser, NonLinearOperationParser,
