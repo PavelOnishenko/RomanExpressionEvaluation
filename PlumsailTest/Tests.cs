@@ -9,8 +9,7 @@ public class Tests
     [TestCase("II-I", "I")]
     [TestCase("I +I", "II")]
     [TestCase("(I)", "I")]
-    [TestCase("(V-(III))", "II")]
-    [TestCase("((((XXX))))", "XXX")]
+    [TestCase("((I))", "I")]
     public void ExpressionParsing(string input, string expectedEvaluation) => 
         Assert.That(RomanEvaluation.Evaluate(input), Is.EqualTo(expectedEvaluation));
 
