@@ -9,7 +9,7 @@ public class Tests
     [TestCase("II-I", "I")]
     [TestCase("I +I", "II")]
     [TestCase("(I)", "I")]
-    [TestCase("(V-(I))", "IV")]
+    [TestCase("(V-(IV))", "I")]
     public void ExpressionParsing(string input, string expectedEvaluation) => 
         Assert.That(RomanEvaluation.Evaluate(input), Is.EqualTo(expectedEvaluation));
 
@@ -66,7 +66,7 @@ class RomanEvaluation
     private static Parser<int> NumberParser => DigitParser.Many().Token().Select(x => x.Sum());
     private static Parser<char> OperationSignParser => Parse.Char('+').Or(Parse.Char('-'));
     private static Parser<int> OperationParser => 
-        Parse.ChainOperator(OperationSignParser, SubexpressionParser.Or(NumberParser),
+        Parse.ChainOperator(OperationSignParser, NumberParser,
             (op, a, b) => a + b * (op == '+' ? 1 : -1));
 
     private static Parser<int> SubexpressionParser =>
