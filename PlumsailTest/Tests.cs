@@ -5,8 +5,9 @@ namespace PlumsailTest;
 
 public class Tests
 {
-    [Test]
-    public void NonIntegerDivisionIsAllowed()
+    [TestCase("V/III", "I")]
+    [TestCase("-D / ( (CC - XC) / VI - XX)", "CCL")]
+    public void NonIntegerDivisionIsAllowed(string input, string expectedEvaluation)
     {
         var result = RomanEvaluation.Evaluate("V/III", false);
         Assert.That(result, Is.EqualTo("I"));
@@ -30,6 +31,7 @@ public class Tests
     [TestCase("II*II", "IV")]
     [TestCase("I+II*II", "V")]
     [TestCase("VI/III", "II")]
+    [TestCase("((I-V)*V-I)/(-VII)", "III")]
     public void ExpressionParsing(string input, string expectedEvaluation) => 
         Assert.That(RomanEvaluation.Evaluate(input), Is.EqualTo(expectedEvaluation));
 
