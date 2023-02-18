@@ -9,7 +9,8 @@ public class Tests
     [TestCase("II-I", "I")]
     [TestCase("I +I", "II")]
     [TestCase("(I)", "I")]
-    [TestCase("(V-(IV))", "I")]
+    [TestCase("(V-(III))", "II")]
+    [TestCase("((((XXX))))", "XXX")]
     public void ExpressionParsing(string input, string expectedEvaluation) => 
         Assert.That(RomanEvaluation.Evaluate(input), Is.EqualTo(expectedEvaluation));
 
@@ -37,7 +38,7 @@ class RomanEvaluation
 {
     public static string Evaluate(string input)
     {
-        var number = SubexpressionParser.Parse(input);
+        var number = ExpressionParser.Parse(input);
         return IntToRoman(number);
     }
 
@@ -63,17 +64,6 @@ class RomanEvaluation
 
     //todo add initial string and add iv to the digit info collection
     private static Parser<int> BaseDigitParser => Parse.String("IV").Return(4);
-    private static Parser<int> NumberParser => DigitParser.Many().Token().Select(x => x.Sum());
-    private static Parser<char> OperationSignParser => Parse.Char('+').Or(Parse.Char('-'));
-    private static Parser<int> OperationParser => 
-        Parse.ChainOperator(OperationSignParser, NumberParser,
-            (op, a, b) => a + b * (op == '+' ? 1 : -1));
-
-    private static Parser<int> SubexpressionParser =>
-        from leftLimit in Parse.Char('(').Optional().Token()
-        from expression in OperationParser
-        from rightLimit in Parse.Char(')').Optional().Token()
-        select expression;
 
     private static Parser<int> DigitParser
     {
@@ -81,9 +71,23 @@ class RomanEvaluation
         {
             var digitsForParsing = RomanDigits.OrderByDescending(x => x.roman.Length).ToArray();
             var result = BaseDigitParser;
-            foreach(var tuple in digitsForParsing)
+            foreach (var tuple in digitsForParsing)
                 result = result.Or(Parse.String(tuple.roman).Return(tuple.val));
             return result;
         }
     }
+    private static Parser<int> NumberParser => DigitParser.Many().Token().Select(x => x.Sum());
+    private static Parser<char> OperationSignParser => Parse.Char('+').Or(Parse.Char('-'));
+    private static Parser<int> OperationParser => 
+        Parse.ChainOperator(OperationSignParser, ExpressionParser,
+            (op, a, b) => a + b * (op == '+' ? 1 : -1));
+
+    private static Parser<int> ExpressionParser =>
+        SubexpressionParser.Or(NumberParser);
+
+    private static Parser<int> SubexpressionParser =>
+        from leftLimit in Parse.Char('(').Token()
+        from expression in OperationParser
+        from rightLimit in Parse.Char(')').Token()
+        select expression;
 }
