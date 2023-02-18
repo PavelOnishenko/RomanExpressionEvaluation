@@ -12,6 +12,7 @@ public class Tests
     [TestCase("((I))", "I")]
     [TestCase("I-II", "-I")]
     [TestCase("II*II", "IV")]
+    [TestCase("I+II*II", "V")]
     public void ExpressionParsing(string input, string expectedEvaluation) => 
         Assert.That(RomanEvaluation.Evaluate(input), Is.EqualTo(expectedEvaluation));
 
@@ -35,7 +36,7 @@ public class Tests
 
 class RomanEvaluation
 {
-    public static string Evaluate(string input) => IntToRoman(OperationParser.Parse(input));
+    public static string Evaluate(string input) => IntToRoman(LinearOperationParser.Parse(input));
 
     private static string IntToRoman(int number)
     {
@@ -75,20 +76,28 @@ class RomanEvaluation
     }
 
     private static Parser<int> NumberParser => DigitParser.Many().Token().Select(x => x.Sum());
-    private static Parser<char> OperationSignParser => 
-        Parse.Char('*').Or(Parse.Char('+')).Or(Parse.Char('-'));
+    private static Parser<char> LinearOperationSignParser => Parse.Char('+').Or(Parse.Char('-'));
+    private static Parser<char> NonLinearOperationSignParser => Parse.Char('*');
     private static Parser<int> ExpressionParser =>
         SubexpressionParser.Or(NumberParser);
-    private static Parser<int> OperationParser => 
-        Parse.ChainOperator(OperationSignParser, ExpressionParser,
+    private static Parser<int> NonLinearOperationParser =>
+        Parse.ChainOperator(NonLinearOperationSignParser, ExpressionParser,
             (operatorSign, a, b) => operatorSign switch
-                {
-                    '*' => a * b,'+' => a + b, '-' => a - b,
-                    _ => throw new Exception($"Unknown operator sign: [{operatorSign}].")
-                });
+            {
+                '*' => a * b,
+                _ => throw new Exception($"Unknown non-linear operator sign: [{operatorSign}].")
+            });
+    private static Parser<int> LinearOperationParser =>
+        Parse.ChainOperator(LinearOperationSignParser, NonLinearOperationParser,
+            (operatorSign, a, b) => operatorSign switch
+            {
+                '+' => a + b,
+                '-' => a - b,
+                _ => throw new Exception($"Unknown linear operator sign: [{operatorSign}].")
+            });
     private static Parser<int> SubexpressionParser =>
         from leftLimit in Parse.Char('(').Token()
-        from expression in OperationParser
+        from expression in LinearOperationParser
         from rightLimit in Parse.Char(')').Token()
         select expression;
 }
