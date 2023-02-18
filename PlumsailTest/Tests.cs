@@ -30,17 +30,11 @@ public class Tests
     [TestCase("M")]
     public void OneDigit(string romanNumber) =>
         Assert.That(RomanEvaluation.Evaluate(romanNumber), Is.EqualTo(romanNumber));
-
-    
 }
 
 class RomanEvaluation
 {
-    public static string Evaluate(string input)
-    {
-        var number = ExpressionParser.Parse(input);
-        return IntToRoman(number);
-    }
+    public static string Evaluate(string input) => IntToRoman(OperationParser.Parse(input));
 
     private static string IntToRoman(int number)
     {
@@ -78,13 +72,11 @@ class RomanEvaluation
     }
     private static Parser<int> NumberParser => DigitParser.Many().Token().Select(x => x.Sum());
     private static Parser<char> OperationSignParser => Parse.Char('+').Or(Parse.Char('-'));
+    private static Parser<int> ExpressionParser =>
+        SubexpressionParser.Or(NumberParser);
     private static Parser<int> OperationParser => 
         Parse.ChainOperator(OperationSignParser, ExpressionParser,
             (op, a, b) => a + b * (op == '+' ? 1 : -1));
-
-    private static Parser<int> ExpressionParser =>
-        SubexpressionParser.Or(NumberParser);
-
     private static Parser<int> SubexpressionParser =>
         from leftLimit in Parse.Char('(').Token()
         from expression in OperationParser
