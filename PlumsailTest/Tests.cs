@@ -1,8 +1,5 @@
 using Sprache;
-using System;
 using System.Data;
-using System.Globalization;
-using System.Linq;
 
 namespace PlumsailTest;
 
@@ -69,14 +66,14 @@ class RomanEvaluation
     private static Parser<int> NumberParser => DigitParser.Many().Token().Select(x => x.Sum());
     private static Parser<char> OperationSignParser => Parse.Char('+').Or(Parse.Char('-'));
     private static Parser<int> OperationParser => 
-        Parse.ChainOperator(OperationSignParser, SubexpressionParser,
+        Parse.ChainOperator(OperationSignParser, SubexpressionParser.Or(NumberParser),
             (op, a, b) => a + b * (op == '+' ? 1 : -1));
 
     private static Parser<int> SubexpressionParser =>
-        from lparen in Parse.Char('(').Optional().Token()
-        from expr in OperationParser
-        from rparen in Parse.Char(')').Optional().Token()
-        select expr;
+        from leftLimit in Parse.Char('(').Optional().Token()
+        from expression in OperationParser
+        from rightLimit in Parse.Char(')').Optional().Token()
+        select expression;
 
     private static Parser<int> DigitParser
     {
@@ -85,9 +82,7 @@ class RomanEvaluation
             var digitsForParsing = RomanDigits.OrderByDescending(x => x.roman.Length).ToArray();
             var result = BaseDigitParser;
             foreach(var tuple in digitsForParsing)
-            {
                 result = result.Or(Parse.String(tuple.roman).Return(tuple.val));
-            }
             return result;
         }
     }
