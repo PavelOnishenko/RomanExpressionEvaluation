@@ -11,6 +11,7 @@ public class Tests
     [TestCase("(I)", "I")]
     [TestCase("((I))", "I")]
     [TestCase("I-II", "-I")]
+    [TestCase("II*II", "IV")]
     public void ExpressionParsing(string input, string expectedEvaluation) => 
         Assert.That(RomanEvaluation.Evaluate(input), Is.EqualTo(expectedEvaluation));
 
@@ -72,13 +73,19 @@ class RomanEvaluation
             return result;
         }
     }
+
     private static Parser<int> NumberParser => DigitParser.Many().Token().Select(x => x.Sum());
-    private static Parser<char> OperationSignParser => Parse.Char('+').Or(Parse.Char('-'));
+    private static Parser<char> OperationSignParser => 
+        Parse.Char('*').Or(Parse.Char('+')).Or(Parse.Char('-'));
     private static Parser<int> ExpressionParser =>
         SubexpressionParser.Or(NumberParser);
     private static Parser<int> OperationParser => 
         Parse.ChainOperator(OperationSignParser, ExpressionParser,
-            (op, a, b) => a + b * (op == '+' ? 1 : -1));
+            (operatorSign, a, b) => operatorSign switch
+                {
+                    '*' => a * b,'+' => a + b, '-' => a - b,
+                    _ => throw new Exception($"Unknown operator sign: [{operatorSign}].")
+                });
     private static Parser<int> SubexpressionParser =>
         from leftLimit in Parse.Char('(').Token()
         from expression in OperationParser
