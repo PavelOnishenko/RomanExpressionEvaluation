@@ -10,6 +10,7 @@ public class Tests
     [TestCase("I +I", "II")]
     [TestCase("(I)", "I")]
     [TestCase("((I))", "I")]
+    [TestCase("I-II", "-I")]
     public void ExpressionParsing(string input, string expectedEvaluation) => 
         Assert.That(RomanEvaluation.Evaluate(input), Is.EqualTo(expectedEvaluation));
 
@@ -37,15 +38,17 @@ class RomanEvaluation
 
     private static string IntToRoman(int number)
     {
+        var abs = Math.Abs(number);
         var result = "";
         var digitIndex = 0;
-        while (number > 0)
-            if (number >= RomanDigits[digitIndex].val)
+        while (abs > 0)
+            if (abs >= RomanDigits[digitIndex].val)
             {
-                number -= RomanDigits[digitIndex].val;
+                abs -= RomanDigits[digitIndex].val;
                 result += RomanDigits[digitIndex].roman;
             }
             else digitIndex++;
+        if (number < 0) result = "-" + result;
         return result;
     }
 
