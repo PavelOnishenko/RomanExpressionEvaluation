@@ -6,7 +6,14 @@ namespace PlumsailTest;
 public class Tests
 {
     [Test]
-    public void NonIntegerDivision()
+    public void NonIntegerDivisionIsAllowed()
+    {
+        var result = RomanEvaluation.Evaluate("V/III", false);
+        Assert.That(result, Is.EqualTo("I"));
+    }
+
+    [Test]
+    public void NonIntegerDivisionIsProhibited()
     {
         var exception = Assert.Throws<Exception>(() => RomanEvaluation.Evaluate("III/II", true));
 
