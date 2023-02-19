@@ -4,6 +4,16 @@ namespace PlumsailTest;
 
 public class Tests
 {
+    [TestCase("f", "'f'")]
+    [TestCase("(I*(X - 1)) $", "'1', '$'")]
+    public void IncorrectInput(string input, string expectedUnacceptables)
+    {
+        var exception = Assert.Throws<Exception>(() => RomanEvaluation.Evaluate(input));
+
+        Assert.That(exception.Message, 
+            Is.EqualTo($"Input contains unacceptable characters: [{expectedUnacceptables}]."));
+    }
+
     [TestCase("V/III", "I")]
     [TestCase("-D / ( (CC - XC) / VI - XX)", "CCL")]
     public void NonIntegerDivisionIsAllowed(string input, string expectedEvaluation)

@@ -7,6 +7,14 @@ public static class RomanEvaluation
 {
     public static string Evaluate(string input, bool throwOnNonIntegerDivision = true)
     {
+        var alphabet = RomanDigits.Select(x => x.roman).SelectMany(x => x).Distinct()
+            .Concat(new[] { '+', '-', '*', '/', '(', ')', ' ' }).ToArray();
+        if (input.Distinct().Any(x => alphabet.Contains(x) == false))
+        {
+            var unacceptables = input.Distinct().Except(alphabet).ToArray();
+            string unacceptablesString = string.Join(", ", unacceptables.Select(x => $"'{x}'"));
+            throw new Exception($"Input contains unacceptable characters: [{unacceptablesString}].");
+        }
         willThrowOnNonIntegerDivision = throwOnNonIntegerDivision;
         return IntToRoman(LinearOperationParser.Parse(input));
     }
