@@ -16,11 +16,8 @@ public class Tests
 
     [TestCase("V/III", "I")]
     [TestCase("-D / ( (CC - XC) / VI - XX)", "CCL")]
-    public void NonIntegerDivisionIsAllowed(string input, string expectedEvaluation)
-    {
-        var result = RomanEvaluation.Evaluate("V/III", false);
-        Assert.That(result, Is.EqualTo("I"));
-    }
+    public void NonIntegerDivisionIsAllowed(string input, string expectedEvaluation) => 
+        Assert.That(RomanEvaluation.Evaluate(input, false), Is.EqualTo(expectedEvaluation));
 
     [Test]
     public void NonIntegerDivisionIsProhibited()

@@ -43,8 +43,7 @@ public static class RomanEvaluation
         ("XC", 90), ("L", 50), ("XL", 40), ("X", 10), ("IX", 9), ("V", 5), ("IV", 4), ("I", 1)
     };
 
-    //todo add initial string and add iv to the digit info collection
-    private static Parser<int> BaseDigitParser => Parse.String("IV").Return(4);
+    private static Parser<int> BaseDigitParser => Parse.String("0").Return(0);
 
     private static Parser<int> DigitParser
     {
