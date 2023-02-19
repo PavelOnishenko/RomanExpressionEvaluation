@@ -8,7 +8,7 @@ public static class RomanEvaluation
     public static string Evaluate(string input, bool throwOnNonIntegerDivision = true)
     {
         var alphabet = RomanDigits.Select(x => x.roman).SelectMany(x => x).Distinct()
-            .Concat(new[] { '+', '-', '*', '/', '(', ')', ' ' }).ToArray();
+            .Concat(new[] { '+', '-', '*', '/', '(', ')', ' ', '0' }).ToArray();
         if (input.Distinct().Any(x => alphabet.Contains(x) == false))
         {
             var unacceptables = input.Distinct().Except(alphabet).ToArray();
@@ -23,6 +23,7 @@ public static class RomanEvaluation
 
     private static string IntToRoman(int number)
     {
+        if (number == 0) return "0";
         var abs = Math.Abs(number);
         var result = "";
         var digitIndex = 0;
@@ -51,8 +52,8 @@ public static class RomanEvaluation
         {
             var digitsForParsing = RomanDigits.OrderByDescending(x => x.roman.Length).ToArray();
             var result = BaseDigitParser;
-            foreach (var tuple in digitsForParsing)
-                result = result.Or(Parse.String(tuple.roman).Return(tuple.val));
+            foreach (var (roman, val) in digitsForParsing)
+                result = result.Or(Parse.String(roman).Return(val));
             return result;
         }
     }

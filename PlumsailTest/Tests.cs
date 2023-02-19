@@ -1,6 +1,6 @@
 using RomanEvaluationLibrary;
 
-namespace PlumsailTest;
+namespace RomanEvaluationTests;
 
 public class Tests
 {
@@ -38,6 +38,7 @@ public class Tests
     [TestCase("I+II*II", "V")]
     [TestCase("VI/III", "II")]
     [TestCase("((I-V)*V-I)/(-VII)", "III")]
+    [TestCase("0", "0")]
     public void ExpressionParsing(string input, string expectedEvaluation) => 
         Assert.That(RomanEvaluation.Evaluate(input), Is.EqualTo(expectedEvaluation));
 
