@@ -72,8 +72,7 @@ public static class RomanEvaluation
                         $"To allow it, pass throwOnNonIntegerDivision = false. [{a}] / [{b}].");
                 return operatorSign switch
                 {
-                    '*' => a * b,
-                    '/' => a / b,
+                    '*' => a * b, '/' => a / b,
                     _ => throw new Exception($"Unknown non-linear operator sign: [{operatorSign}].")
                 };
             });
@@ -81,8 +80,7 @@ public static class RomanEvaluation
         Parse.ChainOperator(LinearOperationSignParser, NonLinearOperationParser,
             (operatorSign, a, b) => operatorSign switch
             {
-                '+' => a + b,
-                '-' => a - b,
+                '+' => a + b, '-' => a - b,
                 _ => throw new Exception($"Unknown linear operator sign: [{operatorSign}].")
             });
     private static Parser<int> SubexpressionParser =>
